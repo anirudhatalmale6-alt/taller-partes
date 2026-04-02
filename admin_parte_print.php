@@ -29,7 +29,21 @@ foreach ($articulos as $a) { $total_coste += $a['precio_coste']*$a['cantidad']; 
 function ft($min) { $min=(float)$min; $h=floor($min/60); $m=round($min%60); return $h>0?"{$h}h {$m}m":"{$m}m"; }
 function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' &euro;'; }
 
-// Build HTML for PDF
+// Embed logo as base64
+$logoPath = __DIR__ . '/logo.png';
+$logoBase64 = '';
+if (file_exists($logoPath)) {
+    $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+}
+
+// Vehicle identifier
+$vehiculoId = $parte['matricula'];
+$vehiculoLabel = 'Matricula';
+if (!empty($parte['bastidor'])) {
+    $vehiculoId = $parte['bastidor'];
+    $vehiculoLabel = 'Bastidor';
+}
+
 ob_start();
 ?>
 <!DOCTYPE html>
@@ -37,15 +51,16 @@ ob_start();
 <head>
     <meta charset="UTF-8">
     <style>
-        @page { margin: 15mm 12mm; }
+        @page { margin: 18mm 20mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
 
         .print-header {
-            text-align: center; padding: 12px 0 8px;
+            text-align: center; padding: 8px 0 8px;
             border-bottom: 3px solid #222; margin-bottom: 10px;
         }
-        .print-header h1 { font-size: 22px; letter-spacing: 2px; margin-bottom: 2px; }
+        .print-header img { height: 60px; margin-bottom: 4px; }
+        .print-header h1 { font-size: 20px; letter-spacing: 2px; margin-bottom: 2px; }
         .print-header .subtitle { font-size: 11px; color: #555; }
 
         .vehicle-line {
@@ -68,7 +83,7 @@ ob_start();
 
         .priority-badge {
             display: inline-block; padding: 1px 8px; font-size: 9px;
-            border-radius: 3px; font-weight: bold; text-transform: uppercase;
+            font-weight: bold; text-transform: uppercase;
         }
         .priority-baja { background: #d4edda; color: #155724; }
         .priority-normal { background: #d6e9f8; color: #084298; }
@@ -85,12 +100,16 @@ ob_start();
 <body>
 
     <div class="print-header">
+        <?php if ($logoBase64): ?>
+            <img src="<?= $logoBase64 ?>" alt="Logo">
+            <br>
+        <?php endif; ?>
         <h1>PARTE DE TRABAJO</h1>
         <div class="subtitle">N&ordm; <?= $id ?> | <?= date('d/m/Y', strtotime($parte['created_at'])) ?></div>
     </div>
 
     <div class="vehicle-line">
-        <?= htmlspecialchars($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?> - <?= htmlspecialchars($parte['matricula']) ?>
+        <?= htmlspecialchars($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?> - <?= htmlspecialchars($vehiculoId) ?>
         <span class="priority-badge priority-<?= $parte['prioridad'] ?? 'normal' ?>" style="float:right; margin-top:2px">
             <?= ucfirst($parte['prioridad'] ?? 'normal') ?>
         </span>
@@ -110,8 +129,8 @@ ob_start();
             <tr>
                 <th style="width:6%">Id</th>
                 <th>Trabajos a realizar</th>
-                <th style="width:12%" class="text-center">Tiempo</th>
-                <th style="width:12%" class="text-center">Tiempo</th>
+                <th style="width:12%" class="text-center">Tiempo Est.</th>
+                <th style="width:12%" class="text-center">Tiempo Real</th>
                 <th style="width:6%" class="text-center">Op</th>
             </tr>
         </thead>

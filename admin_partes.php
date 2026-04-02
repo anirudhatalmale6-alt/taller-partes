@@ -85,7 +85,9 @@ require 'header.php';
             <td><?= $p['id'] ?></td>
             <td><?= sanitize($p['cliente_nombre'] . ' ' . $p['cliente_apellidos']) ?></td>
             <td><?= sanitize($p['vehiculo_marca'] . ' ' . $p['vehiculo_modelo']) ?></td>
-            <td><strong><?= sanitize($p['matricula']) ?></strong></td>
+            <td><strong><?= sanitize($p['matricula'] ?: $p['bastidor']) ?></strong>
+                <?php if (!$p['matricula'] && $p['bastidor']): ?><br><small class="text-muted">Bastidor</small><?php endif; ?>
+            </td>
             <td><?= sanitize($p['operador_nombre'] ?? 'Sin asignar') ?></td>
             <td>
                 <span class="badge bg-info"><?= $p['tareas_cerradas'] ?>/<?= $p['total_tareas'] ?></span>

@@ -12,6 +12,7 @@ $telefono = trim($_POST['telefono'] ?? '');
 $vehiculo_marca = trim($_POST['vehiculo_marca'] ?? '');
 $vehiculo_modelo = trim($_POST['vehiculo_modelo'] ?? '');
 $matricula = trim($_POST['matricula'] ?? '');
+$bastidor = trim($_POST['bastidor'] ?? '');
 $operador_id = (int)($_POST['operador_id'] ?? 0) ?: null;
 $prioridad = $_POST['prioridad'] ?? 'normal';
 if (!in_array($prioridad, ['baja','normal','alta'])) $prioridad = 'normal';
@@ -40,33 +41,39 @@ try {
         }
     }
 
-    // Auto-create or use existing vehicle
-    if (!$vehiculo_id && $matricula && $cliente_id) {
-        $existing = $pdo->prepare("SELECT id FROM vehiculos WHERE matricula=?");
-        $existing->execute([$matricula]);
+    // Auto-create or use existing vehicle (search by matricula or bastidor)
+    $vehiculoIdentifier = $matricula ?: $bastidor;
+    if (!$vehiculo_id && $vehiculoIdentifier && $cliente_id) {
+        if ($bastidor) {
+            $existing = $pdo->prepare("SELECT id FROM vehiculos WHERE bastidor=?");
+            $existing->execute([$bastidor]);
+        } else {
+            $existing = $pdo->prepare("SELECT id FROM vehiculos WHERE matricula=?");
+            $existing->execute([$matricula]);
+        }
         $found = $existing->fetch();
         if ($found) {
             $vehiculo_id = (int)$found['id'];
         } else {
-            $stmt = $pdo->prepare("INSERT INTO vehiculos (cliente_id, marca, modelo, matricula) VALUES (?,?,?,?)");
-            $stmt->execute([$cliente_id, $vehiculo_marca, $vehiculo_modelo, $matricula]);
+            $stmt = $pdo->prepare("INSERT INTO vehiculos (cliente_id, marca, modelo, matricula, bastidor) VALUES (?,?,?,?,?)");
+            $stmt->execute([$cliente_id, $vehiculo_marca, $vehiculo_modelo, $matricula, $bastidor]);
             $vehiculo_id = (int)$pdo->lastInsertId();
         }
     }
 
     if ($id > 0) {
-        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=?, cliente_id=?, vehiculo_id=?, prioridad=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, bastidor=?, telefono=?, operador_id=?, cliente_id=?, vehiculo_id=?, prioridad=? WHERE id=?");
         $stmt->execute([
             $cliente_nombre, $cliente_apellidos,
             $vehiculo_marca, $vehiculo_modelo,
-            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id, $prioridad, $id
+            $matricula, $bastidor, $telefono, $operador_id, $cliente_id, $vehiculo_id, $prioridad, $id
         ]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO partes (cliente_nombre, cliente_apellidos, vehiculo_marca, vehiculo_modelo, matricula, telefono, operador_id, cliente_id, vehiculo_id, prioridad) VALUES (?,?,?,?,?,?,?,?,?,?)");
+        $stmt = $pdo->prepare("INSERT INTO partes (cliente_nombre, cliente_apellidos, vehiculo_marca, vehiculo_modelo, matricula, bastidor, telefono, operador_id, cliente_id, vehiculo_id, prioridad) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
         $stmt->execute([
             $cliente_nombre, $cliente_apellidos,
             $vehiculo_marca, $vehiculo_modelo,
-            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id, $prioridad
+            $matricula, $bastidor, $telefono, $operador_id, $cliente_id, $vehiculo_id, $prioridad
         ]);
         $id = (int)$pdo->lastInsertId();
     }

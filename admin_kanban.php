@@ -78,7 +78,7 @@ function renderCard($p) {
             <span class="badge badge-prioridad-<?= $p['prioridad'] ?? 'normal' ?>" style="font-size:0.65rem"><?= ucfirst($p['prioridad'] ?? 'normal') ?></span>
         </div>
         <div class="card-sub">
-            <i class="bi bi-car-front"></i> <?= sanitize($p['vehiculo_marca'] . ' ' . $p['vehiculo_modelo']) ?> - <strong><?= sanitize($p['matricula']) ?></strong>
+            <i class="bi bi-car-front"></i> <?= sanitize($p['vehiculo_marca'] . ' ' . $p['vehiculo_modelo']) ?> - <strong><?= sanitize($p['matricula'] ?: $p['bastidor']) ?></strong>
         </div>
         <div class="card-sub mt-1">
             <i class="bi bi-list-check"></i> <?= $p['tareas_cerradas'] ?>/<?= $p['total_tareas'] ?> tareas

@@ -126,8 +126,13 @@ require 'header.php';
                         <input type="text" name="vehiculo_modelo" id="fModelo" class="form-control" value="<?= sanitize($parte['vehiculo_modelo'] ?? '') ?>">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Matricula</label>
-                        <input type="text" name="matricula" id="fMatricula" class="form-control" value="<?= sanitize($parte['matricula'] ?? '') ?>">
+                        <label class="form-label">Matricula / Bastidor</label>
+                        <input type="text" name="matricula_bastidor" id="fMatriculaBastidor" class="form-control"
+                            placeholder="Matricula o n. bastidor (>8 dig.)"
+                            value="<?= sanitize(!empty($parte['bastidor']) ? $parte['bastidor'] : ($parte['matricula'] ?? '')) ?>">
+                        <small class="text-muted" id="matriculaBastidorHint">Si tiene mas de 8 caracteres se guardara como bastidor</small>
+                        <input type="hidden" name="matricula" id="fMatricula" value="<?= sanitize($parte['matricula'] ?? '') ?>">
+                        <input type="hidden" name="bastidor" id="fBastidor" value="<?= sanitize($parte['bastidor'] ?? '') ?>">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Operario asignado</label>
@@ -293,14 +298,17 @@ document.getElementById('clienteClear').addEventListener('click', function(e) {
 
 // Vehicle autocomplete (searches by matricula, marca, modelo)
 setupAutocomplete('buscarVehiculo', 'listaVehiculos', 'api_buscar.php?tipo=vehiculos', function(item) {
+    var identifier = item.matricula || item.bastidor || '';
     document.getElementById('vehiculoId').value = item.id;
-    document.getElementById('buscarVehiculo').value = item.matricula + ' - ' + item.marca + ' ' + item.modelo;
-    document.getElementById('vehiculoInfoNombre').textContent = item.matricula + ' - ' + item.marca + ' ' + item.modelo;
+    document.getElementById('buscarVehiculo').value = identifier + ' - ' + item.marca + ' ' + item.modelo;
+    document.getElementById('vehiculoInfoNombre').textContent = identifier + ' - ' + item.marca + ' ' + item.modelo;
     document.getElementById('vehiculoInfo').style.display = '';
     document.getElementById('camposNuevoVehiculo').style.display = 'none';
     document.getElementById('fMarca').value = item.marca;
     document.getElementById('fModelo').value = item.modelo;
-    document.getElementById('fMatricula').value = item.matricula;
+    document.getElementById('fMatricula').value = item.matricula || '';
+    document.getElementById('fBastidor').value = item.bastidor || '';
+    document.getElementById('fMatriculaBastidor').value = identifier;
     // If vehicle has a client, auto-select it
     if (item.cliente_id && !document.getElementById('clienteId').value) {
         document.getElementById('clienteId').value = item.cliente_id;
@@ -319,8 +327,30 @@ document.getElementById('vehiculoClear').addEventListener('click', function(e) {
     document.getElementById('fMarca').value = '';
     document.getElementById('fModelo').value = '';
     document.getElementById('fMatricula').value = '';
+    document.getElementById('fBastidor').value = '';
+    document.getElementById('fMatriculaBastidor').value = '';
     document.getElementById('buscarVehiculo').focus();
 });
+
+// Matricula / Bastidor auto-detect
+var mbInput = document.getElementById('fMatriculaBastidor');
+var mbHint = document.getElementById('matriculaBastidorHint');
+function updateMatriculaBastidor() {
+    var val = mbInput.value.replace(/\s/g, '');
+    if (val.length > 8) {
+        document.getElementById('fMatricula').value = '';
+        document.getElementById('fBastidor').value = val;
+        mbHint.textContent = 'Se guardara como BASTIDOR';
+        mbHint.className = 'text-info';
+    } else {
+        document.getElementById('fMatricula').value = val;
+        document.getElementById('fBastidor').value = '';
+        mbHint.textContent = 'Se guardara como MATRICULA';
+        mbHint.className = 'text-muted';
+    }
+}
+mbInput.addEventListener('input', updateMatriculaBastidor);
+updateMatriculaBastidor();
 
 }); // end DOMContentLoaded
 </script>

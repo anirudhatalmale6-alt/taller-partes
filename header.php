@@ -32,8 +32,9 @@
 <div class="d-flex" id="wrapper">
     <!-- Sidebar -->
     <div class="sidebar bg-dark text-white no-print" id="sidebar">
-        <div class="sidebar-header p-3 border-bottom border-secondary">
-            <h6 class="mb-0"><i class="bi bi-wrench-adjustable"></i> Taller Admin</h6>
+        <div class="sidebar-header p-3 border-bottom border-secondary text-center">
+            <img src="logo-white.jpg" alt="Garaje 86" class="img-fluid" style="max-height:50px">
+            <div class="mt-1" style="font-size:0.75rem; color:#adb5bd;">Panel de Administracion</div>
         </div>
         <nav class="sidebar-nav p-2">
             <?php
