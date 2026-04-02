@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 $tipo = $_GET['tipo'] ?? '';
 $q = trim($_GET['q'] ?? '');
 
-if (strlen($q) < 2) { echo '[]'; exit; }
+if (strlen($q) < 1) { echo '[]'; exit; }
 
 $results = [];
 
@@ -16,7 +16,8 @@ if ($tipo === 'clientes') {
     foreach ($stmt->fetchAll() as $c) {
         $results[] = [
             'id' => $c['id'],
-            'label' => '<strong>' . sanitize($c['nombre'] . ' ' . $c['apellidos']) . '</strong><br><small>' . sanitize($c['telefono'] ?: 'Sin telefono') . '</small>',
+            'label' => '<strong>' . sanitize($c['nombre'] . ' ' . $c['apellidos']) . '</strong>'
+                . '<br><small><i class="bi bi-telephone"></i> ' . sanitize($c['telefono'] ?: 'Sin telefono') . '</small>',
             'nombre' => $c['nombre'],
             'apellidos' => $c['apellidos'],
             'telefono' => $c['telefono'],

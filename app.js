@@ -28,22 +28,35 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Autocomplete helper
-function setupAutocomplete(inputId, listId, url, onSelect) {
+function setupAutocomplete(inputId, listId, url, onSelect, options) {
     var input = document.getElementById(inputId);
     var list = document.getElementById(listId);
     if (!input || !list) return;
 
+    var minChars = (options && options.minChars) || 3;
     var debounce = null;
+
     input.addEventListener('input', function() {
         clearTimeout(debounce);
         var q = this.value.trim();
-        if (q.length < 2) { list.innerHTML = ''; list.style.display = 'none'; return; }
+        if (q.length < minChars) { list.innerHTML = ''; list.style.display = 'none'; return; }
         debounce = setTimeout(function() {
-            fetch(url + '?q=' + encodeURIComponent(q))
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            var fetchUrl = url + separator + 'q=' + encodeURIComponent(q);
+            // Append client_id if available (for vehicle filtering)
+            if (options && options.getClienteId) {
+                var cid = options.getClienteId();
+                if (cid) fetchUrl += '&cliente_id=' + cid;
+            }
+            fetch(fetchUrl)
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     list.innerHTML = '';
-                    if (data.length === 0) { list.style.display = 'none'; return; }
+                    if (data.length === 0) {
+                        list.innerHTML = '<div class="autocomplete-item text-muted"><small>Sin resultados</small></div>';
+                        list.style.display = 'block';
+                        return;
+                    }
                     data.forEach(function(item) {
                         var div = document.createElement('div');
                         div.className = 'autocomplete-item';
@@ -57,7 +70,15 @@ function setupAutocomplete(inputId, listId, url, onSelect) {
                     });
                     list.style.display = 'block';
                 });
-        }, 250);
+        }, 200);
+    });
+
+    // Also trigger on focus if already has enough text
+    input.addEventListener('focus', function() {
+        var q = this.value.trim();
+        if (q.length >= minChars) {
+            input.dispatchEvent(new Event('input'));
+        }
     });
 
     // Hide on click outside

@@ -55,9 +55,9 @@ require 'header.php';
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-6 position-relative">
-                    <label class="form-label">Buscar cliente (nombre o telefono)</label>
+                    <label class="form-label">Buscar cliente existente (nombre, apellidos o telefono)</label>
                     <input type="text" id="buscarCliente" class="form-control" autocomplete="off"
-                        placeholder="Escribe para buscar..." value="<?= sanitize($clienteNombre) ?>">
+                        placeholder="Escribe nombre o telefono (min. 3 caracteres)..." value="<?= sanitize($clienteNombre) ?>">
                     <div id="listaClientes" class="autocomplete-list" style="display:none"></div>
                     <input type="hidden" name="cliente_id" id="clienteId" value="<?= $parte['cliente_id'] ?? '' ?>">
                 </div>
@@ -100,9 +100,9 @@ require 'header.php';
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-6 position-relative">
-                    <label class="form-label">Buscar vehiculo (matricula o marca)</label>
+                    <label class="form-label">Buscar vehiculo existente (matricula, marca o modelo)</label>
                     <input type="text" id="buscarVehiculo" class="form-control" autocomplete="off"
-                        placeholder="Escribe para buscar..." value="<?= sanitize($vehiculoNombre) ?>">
+                        placeholder="Escribe matricula o marca (min. 3 caracteres)..." value="<?= sanitize($vehiculoNombre) ?>">
                     <div id="listaVehiculos" class="autocomplete-list" style="display:none"></div>
                     <input type="hidden" name="vehiculo_id" id="vehiculoId" value="<?= $parte['vehiculo_id'] ?? '' ?>">
                 </div>
@@ -264,11 +264,14 @@ function addArticulo() {
     artIdx++;
 }
 
-// Client autocomplete
+// Wait for app.js to load (it's in the footer)
+document.addEventListener('DOMContentLoaded', function() {
+
+// Client autocomplete (searches by name, apellidos and telefono)
 setupAutocomplete('buscarCliente', 'listaClientes', 'api_buscar.php?tipo=clientes', function(item) {
     document.getElementById('clienteId').value = item.id;
     document.getElementById('buscarCliente').value = item.nombre + ' ' + item.apellidos;
-    document.getElementById('clienteInfoNombre').textContent = item.nombre + ' ' + item.apellidos;
+    document.getElementById('clienteInfoNombre').textContent = item.nombre + ' ' + item.apellidos + (item.telefono ? ' - Tel: ' + item.telefono : '');
     document.getElementById('clienteInfo').style.display = '';
     document.getElementById('camposNuevoCliente').style.display = 'none';
     document.getElementById('nuevoClienteBox').style.display = 'none';
@@ -276,9 +279,9 @@ setupAutocomplete('buscarCliente', 'listaClientes', 'api_buscar.php?tipo=cliente
     document.getElementById('fNombre').value = item.nombre;
     document.getElementById('fApellidos').value = item.apellidos;
     document.getElementById('fTelefono').value = item.telefono;
-    // Refresh vehicle search for this client
+    // Store for vehicle filtering
     window.selectedClienteId = item.id;
-});
+}, {minChars: 3});
 
 document.getElementById('clienteClear').addEventListener('click', function(e) {
     e.preventDefault();
@@ -290,11 +293,11 @@ document.getElementById('clienteClear').addEventListener('click', function(e) {
     document.getElementById('fApellidos').value = '';
     document.getElementById('fTelefono').value = '';
     window.selectedClienteId = 0;
+    document.getElementById('buscarCliente').focus();
 });
 
-// Vehicle autocomplete
-setupAutocomplete('buscarVehiculo', 'listaVehiculos',
-    'api_buscar.php?tipo=vehiculos', function(item) {
+// Vehicle autocomplete (searches by matricula, marca, modelo)
+setupAutocomplete('buscarVehiculo', 'listaVehiculos', 'api_buscar.php?tipo=vehiculos', function(item) {
     document.getElementById('vehiculoId').value = item.id;
     document.getElementById('buscarVehiculo').value = item.matricula + ' - ' + item.marca + ' ' + item.modelo;
     document.getElementById('vehiculoInfoNombre').textContent = item.matricula + ' - ' + item.marca + ' ' + item.modelo;
@@ -307,6 +310,9 @@ setupAutocomplete('buscarVehiculo', 'listaVehiculos',
     if (item.cliente_id && !document.getElementById('clienteId').value) {
         document.getElementById('clienteId').value = item.cliente_id;
     }
+}, {
+    minChars: 3,
+    getClienteId: function() { return document.getElementById('clienteId').value || window.selectedClienteId || ''; }
 });
 
 document.getElementById('vehiculoClear').addEventListener('click', function(e) {
@@ -318,14 +324,10 @@ document.getElementById('vehiculoClear').addEventListener('click', function(e) {
     document.getElementById('fMarca').value = '';
     document.getElementById('fModelo').value = '';
     document.getElementById('fMatricula').value = '';
+    document.getElementById('buscarVehiculo').focus();
 });
 
-// Override vehicle search URL to include client_id
-var origInput = document.getElementById('buscarVehiculo');
-origInput.addEventListener('input', function() {
-    var cid = document.getElementById('clienteId').value;
-    // Update the URL dynamically - handled in setupAutocomplete via closure
-});
+}); // end DOMContentLoaded
 </script>
 
 <?php require 'footer.php'; ?>
