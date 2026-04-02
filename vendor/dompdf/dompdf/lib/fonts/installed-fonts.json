@@ -1,0 +1,8 @@
+{
+    "dosis": {
+        "normal": "dosis_normal",
+        "bold": "dosis_bold",
+        "italic": "dosis_normal",
+        "bold_italic": "dosis_bold"
+    }
+}

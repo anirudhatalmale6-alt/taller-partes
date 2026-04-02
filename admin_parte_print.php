@@ -29,6 +29,11 @@ foreach ($articulos as $a) { $total_coste += $a['precio_coste']*$a['cantidad']; 
 function ft($min) { $min=(float)$min; $h=floor($min/60); $m=round($min%60); return $h>0?"{$h}h {$m}m":"{$m}m"; }
 function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' &euro;'; }
 
+// Determine base URL for font loading
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$baseUrl = $protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . dirname($_SERVER['SCRIPT_NAME']);
+$baseUrl = rtrim($baseUrl, '/') . '/';
+
 // Embed logo as base64
 $logoPath = __DIR__ . '/logo.png';
 $logoBase64 = '';
@@ -36,12 +41,17 @@ if (file_exists($logoPath)) {
     $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 }
 
+// Embed diagnostico image as base64
+$diagPath = __DIR__ . '/diagnostico.png';
+$diagBase64 = '';
+if (file_exists($diagPath)) {
+    $diagBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($diagPath));
+}
+
 // Vehicle identifier
 $vehiculoId = $parte['matricula'];
-$vehiculoLabel = 'Matricula';
 if (!empty($parte['bastidor'])) {
     $vehiculoId = $parte['bastidor'];
-    $vehiculoLabel = 'Bastidor';
 }
 
 ob_start();
@@ -53,37 +63,37 @@ ob_start();
     <style>
         @page { margin: 18mm 20mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        body { font-family: "Dosis", Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
 
         .print-header {
-            text-align: center; padding: 8px 0 8px;
-            border-bottom: 3px solid #222; margin-bottom: 10px;
+            text-align: center; padding: 4px 0 4px;
+            border-bottom: 3px solid #222; margin-bottom: 6px;
         }
-        .print-header img { height: 60px; margin-bottom: 4px; }
-        .print-header h1 { font-size: 20px; letter-spacing: 2px; margin-bottom: 2px; }
+        .print-header img { height: 100px; margin-bottom: 2px; }
+        .print-header h1 { font-size: 20px; letter-spacing: 2px; margin-bottom: 2px; font-weight: 700; }
         .print-header .subtitle { font-size: 11px; color: #555; }
 
         .vehicle-line {
-            font-size: 14px; font-weight: bold; padding: 8px 0 6px;
+            font-size: 14px; font-weight: 700; padding: 8px 0 6px;
             border-bottom: 1px solid #ccc; margin-bottom: 8px;
         }
 
-        .info-table { width: 100%; margin-bottom: 8px; }
+        .info-table { width: 100%; margin-bottom: 4px; }
         .info-table td { padding: 2px 0; vertical-align: top; }
-        .info-table .lbl { font-weight: bold; color: #555; font-size: 9px; text-transform: uppercase; }
+        .info-table .lbl { font-weight: 700; color: #555; font-size: 9px; text-transform: uppercase; }
 
-        table.data { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        table.data th { background: #333; color: #fff; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        table.data th, table.data td { border: 1px solid #bbb; padding: 5px 8px; text-align: left; }
-        table.data td { font-size: 11px; }
+        table.data { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+        table.data th { background: #333; color: #fff; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        table.data th, table.data td { border: 1px solid #bbb; padding: 3px 6px; text-align: left; }
+        table.data td { font-size: 10px; }
         table.data .text-right { text-align: right; }
         table.data .text-center { text-align: center; }
-        table.data .totals-row { font-weight: bold; background: #f0f0f0; }
-        table.data .empty-row td { height: 22px; }
+        table.data .totals-row { font-weight: 700; background: #f0f0f0; }
+        table.data .empty-row td { height: 18px; }
 
         .priority-badge {
             display: inline-block; padding: 1px 8px; font-size: 9px;
-            font-weight: bold; text-transform: uppercase;
+            font-weight: 700; text-transform: uppercase;
         }
         .priority-baja { background: #d4edda; color: #155724; }
         .priority-normal { background: #d6e9f8; color: #084298; }
@@ -96,10 +106,9 @@ ob_start();
         .print-footer table { width: 100%; }
         .print-footer td { border: none; padding: 0; }
 
-        /* Diagnostico page styles */
-        .dc { padding: 4px 6px; font-size: 10px; border: 1px solid #ddd; }
-        .dline { color: #999; }
-        .cb { display: inline-block; width: 10px; height: 10px; border: 1px solid #555; margin-right: 4px; vertical-align: middle; }
+        /* Page 2: diagnostico as full-page image */
+        .diag-page { text-align: center; }
+        .diag-page img { width: 100%; }
     </style>
 </head>
 <body>
@@ -155,7 +164,7 @@ ob_start();
                 <td class="text-center"><?= $t['cerrada'] ? '&#10003;' : '' ?></td>
             </tr>
         <?php endforeach; ?>
-        <?php for ($i = count($tareas); $i < 10; $i++): ?>
+        <?php for ($i = count($tareas); $i < 12; $i++): ?>
             <tr class="empty-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <?php endfor; ?>
         </tbody>
@@ -177,7 +186,7 @@ ob_start();
                 <td class="text-right"><?= fe($a['precio_venta'] * $a['cantidad']) ?></td>
             </tr>
         <?php endforeach; ?>
-        <?php for ($i = count($articulos); $i < 6; $i++): ?>
+        <?php for ($i = count($articulos); $i < 10; $i++): ?>
             <tr class="empty-row"><td></td><td></td><td></td></tr>
         <?php endfor; ?>
         <tr class="totals-row">
@@ -199,165 +208,13 @@ ob_start();
         </tr></table>
     </div>
 
-    <!-- PAGE 2: Diagnostico -->
+    <!-- PAGE 2: Diagnostico as image -->
+    <?php if ($diagBase64): ?>
     <div style="page-break-before: always;"></div>
-
-    <div style="text-align:center; margin-bottom:10px;">
-        <?php if ($logoBase64): ?>
-            <img src="<?= $logoBase64 ?>" style="height:50px; margin-bottom:4px;"><br>
-        <?php endif; ?>
+    <div class="diag-page">
+        <img src="<?= $diagBase64 ?>" alt="Diagnostico">
     </div>
-
-    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
-        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Check &amp; Diagn&oacute;stico</td></tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Embrague</td>
-            <td class="dc dline">____________________</td>
-            <td class="dc"><span class="cb"></span> Fugas en motor</td>
-            <td class="dc dline">____________________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Distribuci&oacute;n</td>
-            <td class="dc dline">____________________</td>
-            <td class="dc" colspan="2"></td>
-        </tr>
-        <tr>
-            <td class="dc" colspan="2">Km del cambio ______________________</td>
-            <td class="dc" colspan="2">Km actuales ______________________</td>
-        </tr>
-    </table>
-
-    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
-        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Frenos</td></tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Discos de freno delanteros</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Discos de freno traseros</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Latiguillos de freno delanteros</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Latiguillos de freno traseros</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Pastillas de freno delanteros</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Pastillas de freno traseros</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Tambor de freno delanteros</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Tambor de freno traseros</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Bombas de freno delanteros</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Bomb&iacute;n de freno traseros</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Zapatas de freno delanteros</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Zapatas de freno traseros</td>
-            <td class="dc dline">______________</td>
-        </tr>
-    </table>
-
-    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
-        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Neum&aacute;ticos</td></tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Neum&aacute;tico delantero derecho</td>
-            <td class="dc" colspan="1"></td>
-            <td class="dc"><span class="cb"></span> Neum&aacute;tico delantero izquierdo</td>
-            <td class="dc"></td>
-        </tr>
-        <tr>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
-            <td class="dc"></td>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
-            <td class="dc"></td>
-        </tr>
-        <tr>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
-            <td class="dc"></td>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
-            <td class="dc"></td>
-        </tr>
-        <tr>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
-            <td class="dc">BAR</td>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
-            <td class="dc">BAR</td>
-        </tr>
-        <tr><td class="dc" colspan="4" style="height:4px;"></td></tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Neum&aacute;tico trasero derecho</td>
-            <td class="dc"></td>
-            <td class="dc"><span class="cb"></span> Neum&aacute;tico trasero izquierdo</td>
-            <td class="dc"></td>
-        </tr>
-        <tr>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
-            <td class="dc"></td>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
-            <td class="dc"></td>
-        </tr>
-        <tr>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
-            <td class="dc"></td>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
-            <td class="dc"></td>
-        </tr>
-        <tr>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
-            <td class="dc">BAR</td>
-            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
-            <td class="dc">BAR</td>
-        </tr>
-    </table>
-
-    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
-        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Niveles</td></tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Nivel de aceite</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Nivel de l&iacute;quido de direcci&oacute;n</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Nivel de refrigerante</td>
-            <td class="dc dline">______________</td>
-            <td class="dc"><span class="cb"></span> Nivel de agua en limpiaparabrisas</td>
-            <td class="dc dline">______________</td>
-        </tr>
-        <tr>
-            <td class="dc"><span class="cb"></span> Nivel de l&iacute;quido de freno</td>
-            <td class="dc dline">______________</td>
-            <td class="dc" colspan="2"></td>
-        </tr>
-    </table>
-
-    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
-        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Prueba din&aacute;mica</td></tr>
-        <tr>
-            <td class="dc" colspan="2">Kil&oacute;metro salida ______________ Km</td>
-            <td class="dc" colspan="2">Kil&oacute;metro salida ______________ Km</td>
-        </tr>
-        <tr>
-            <td class="dc" colspan="2">Kil&oacute;metro llegada ______________ Km</td>
-            <td class="dc" colspan="2">Kil&oacute;metro llegada ______________ Km</td>
-        </tr>
-    </table>
-
-    <div style="margin-top:10px; font-size:10px;">
-        Observaciones: ____________________________________________________________________________<br><br>
-        ____________________________________________________________________________<br><br>
-        ____________________________________________________________________________
-    </div>
+    <?php endif; ?>
 
 </body>
 </html>
@@ -366,7 +223,8 @@ $html = ob_get_clean();
 
 $options = new Options();
 $options->set('isRemoteEnabled', false);
-$options->set('defaultFont', 'Helvetica');
+$options->set('isFontSubsettingEnabled', true);
+$options->set('defaultFont', 'Dosis');
 
 $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html);
