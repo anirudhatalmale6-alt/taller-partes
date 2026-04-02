@@ -3,10 +3,10 @@ session_start();
 date_default_timezone_set('Europe/Madrid');
 
 // --- CONFIGURACION BASE DE DATOS ---
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'taller');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_HOST', 'PMYSQL126.dns-servicio.com');
+define('DB_NAME', '8542231_partes_trabajo');
+define('DB_USER', 'Partes_Trabajo');
+define('DB_PASS', 'GHaj~Ze5#nbieh85');
 // ------------------------------------
 
 define('APP_NAME', 'Taller - Partes de Trabajo');
