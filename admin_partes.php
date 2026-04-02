@@ -73,6 +73,7 @@ require 'header.php';
             <th>Matricula</th>
             <th>Operario</th>
             <th>Tareas</th>
+            <th>Prioridad</th>
             <th>Estado</th>
             <th>Fecha</th>
             <th>Acciones</th>
@@ -80,7 +81,7 @@ require 'header.php';
     </thead>
     <tbody>
     <?php foreach ($partes as $p): ?>
-        <tr>
+        <tr class="prioridad-<?= $p['prioridad'] ?? 'normal' ?>">
             <td><?= $p['id'] ?></td>
             <td><?= sanitize($p['cliente_nombre'] . ' ' . $p['cliente_apellidos']) ?></td>
             <td><?= sanitize($p['vehiculo_marca'] . ' ' . $p['vehiculo_modelo']) ?></td>
@@ -88,6 +89,9 @@ require 'header.php';
             <td><?= sanitize($p['operador_nombre'] ?? 'Sin asignar') ?></td>
             <td>
                 <span class="badge bg-info"><?= $p['tareas_cerradas'] ?>/<?= $p['total_tareas'] ?></span>
+            </td>
+            <td>
+                <span class="badge badge-prioridad-<?= $p['prioridad'] ?? 'normal' ?>"><?= ucfirst($p['prioridad'] ?? 'normal') ?></span>
             </td>
             <td>
                 <span class="badge badge-<?= $p['estado'] ?>"><?= ucfirst($p['estado']) ?></span>
@@ -101,7 +105,7 @@ require 'header.php';
         </tr>
     <?php endforeach; ?>
     <?php if (empty($partes)): ?>
-        <tr><td colspan="9" class="text-center text-muted py-4">No hay partes de trabajo</td></tr>
+        <tr><td colspan="10" class="text-center text-muted py-4">No hay partes de trabajo</td></tr>
     <?php endif; ?>
     </tbody>
 </table>

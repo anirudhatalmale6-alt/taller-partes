@@ -20,96 +20,171 @@ $total_real = 0;
 foreach ($tareas as $t) $total_real += ($t['tiempo_acumulado'] ?? $t['tiempo_real']);
 $total_coste = 0; $total_venta = 0;
 foreach ($articulos as $a) { $total_coste += $a['precio_coste']*$a['cantidad']; $total_venta += $a['precio_venta']*$a['cantidad']; }
+
+// Format time as Xh Ym
+function ft($min) { $min=(float)$min; $h=floor($min/60); $m=round($min%60); return $h>0?"{$h}h {$m}m":"{$m}m"; }
+function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Parte #<?= $id ?> - Imprimir</title>
+    <title>Parte #<?= $id ?></title>
     <style>
+        @page { margin: 15mm 12mm; size: A4; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 12px; padding: 20px; color: #333; }
-        h1 { font-size: 18px; text-align: center; margin-bottom: 5px; }
-        .subtitle { text-align: center; font-size: 13px; color: #666; margin-bottom: 15px; }
-        .header-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; }
-        .header-grid .field { flex: 1 1 45%; }
-        .header-grid .field label { font-weight: bold; display: block; font-size: 10px; text-transform: uppercase; color: #666; }
-        .header-grid .field span { font-size: 13px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { border: 1px solid #ccc; padding: 5px 8px; text-align: left; }
-        th { background: #f0f0f0; font-size: 11px; text-transform: uppercase; }
-        tfoot th { background: #e8e8e8; }
-        .section-title { font-size: 13px; font-weight: bold; margin: 10px 0 5px; padding: 3px 8px; background: #eee; }
-        .estado { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: bold; border-radius: 3px; }
-        .estado-abierto { background: #d4edda; color: #155724; }
-        .estado-cerrado { background: #e2e3e5; color: #383d41; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #222; padding: 10px; }
+
+        /* Header */
+        .print-header {
+            text-align: center; padding: 12px 0 8px;
+            border-bottom: 3px solid #222; margin-bottom: 10px;
+        }
+        .print-header h1 { font-size: 22px; letter-spacing: 2px; margin-bottom: 2px; }
+        .print-header .subtitle { font-size: 11px; color: #555; }
+
+        /* Vehicle line */
+        .vehicle-line {
+            font-size: 14px; font-weight: bold; padding: 8px 0 6px;
+            border-bottom: 1px solid #ccc; margin-bottom: 8px;
+        }
+
+        /* Info row */
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
+        .info-row .field { }
+        .info-row .field label { font-weight: bold; color: #555; font-size: 9px; text-transform: uppercase; display: block; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th { background: #333; color: #fff; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        th, td { border: 1px solid #bbb; padding: 5px 8px; text-align: left; }
+        td { font-size: 11px; }
+        tbody tr:nth-child(even) { background: #f9f9f9; }
+        tbody tr.empty-row td { border-left: 1px solid #bbb; border-right: 1px solid #bbb; height: 22px; }
         .text-right { text-align: right; }
-        .footer-info { margin-top: 20px; font-size: 10px; color: #999; text-align: center; }
+        .text-center { text-align: center; }
+
+        /* Section titles */
+        .section-title {
+            font-size: 11px; font-weight: bold; text-transform: uppercase;
+            padding: 4px 8px; background: #eee; border: 1px solid #bbb;
+            border-bottom: none; letter-spacing: 0.5px;
+        }
+
+        /* Totals */
+        .totals-row { font-weight: bold; background: #f0f0f0; }
+
+        /* Footer */
+        .print-footer {
+            margin-top: 20px; padding-top: 8px; border-top: 1px solid #ccc;
+            font-size: 9px; color: #999; display: flex; justify-content: space-between;
+        }
+
+        /* Priority indicator */
+        .priority-badge {
+            display: inline-block; padding: 1px 8px; font-size: 9px;
+            border-radius: 3px; font-weight: bold; text-transform: uppercase;
+        }
+        .priority-baja { background: #d4edda; color: #155724; }
+        .priority-normal { background: #d6e9f8; color: #084298; }
+        .priority-alta { background: #f8d7da; color: #842029; }
+
         @media print { body { padding: 0; } }
     </style>
 </head>
 <body>
-    <h1>PARTE DE TRABAJO #<?= $id ?></h1>
-    <div class="subtitle">
-        Fecha: <?= date('d/m/Y', strtotime($parte['created_at'])) ?> |
-        Estado: <span class="estado estado-<?= $parte['estado'] ?>"><?= ucfirst($parte['estado']) ?></span> |
-        Operario: <?= sanitize($parte['operador_nombre'] ?? 'Sin asignar') ?>
+
+    <!-- Header with business name -->
+    <div class="print-header">
+        <h1>PARTE DE TRABAJO</h1>
+        <div class="subtitle">N&ordm; <?= $id ?> | <?= date('d/m/Y', strtotime($parte['created_at'])) ?></div>
     </div>
 
-    <div class="header-grid">
-        <div class="field"><label>Cliente</label><span><?= sanitize($parte['cliente_nombre'] . ' ' . $parte['cliente_apellidos']) ?></span></div>
-        <div class="field"><label>Telefono</label><span><?= sanitize($parte['telefono'] ?: 'N/A') ?></span></div>
-        <div class="field"><label>Vehiculo</label><span><?= sanitize($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?></span></div>
-        <div class="field"><label>Matricula</label><span><?= sanitize($parte['matricula']) ?></span></div>
+    <!-- Vehicle line (prominent, like the sample) -->
+    <div class="vehicle-line">
+        <?= sanitize($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?> - <?= sanitize($parte['matricula']) ?>
+        <span class="priority-badge priority-<?= $parte['prioridad'] ?? 'normal' ?>" style="float:right; margin-top:2px">
+            <?= ucfirst($parte['prioridad'] ?? 'normal') ?>
+        </span>
     </div>
 
-    <div class="section-title">TAREAS</div>
+    <!-- Client info -->
+    <div class="info-row">
+        <div class="field"><label>Cliente</label><?= sanitize($parte['cliente_nombre'] . ' ' . $parte['cliente_apellidos']) ?></div>
+        <div class="field"><label>Telefono</label><?= sanitize($parte['telefono'] ?: 'N/A') ?></div>
+        <div class="field"><label>Operario</label><?= sanitize($parte['operador_nombre'] ?? 'Sin asignar') ?></div>
+        <div class="field"><label>Estado</label><?= ucfirst($parte['estado']) ?></div>
+    </div>
+
+    <!-- Trabajos a realizar -->
     <table>
         <thead>
-            <tr><th>Descripcion</th><th>T. Estimado</th><th>T. Real</th><th>Estado</th><th>Observaciones</th></tr>
+            <tr>
+                <th style="width:6%">Id</th>
+                <th>Trabajos a realizar</th>
+                <th style="width:12%" class="text-center">Tiempo</th>
+                <th style="width:12%" class="text-center">Tiempo</th>
+                <th style="width:6%" class="text-center">Op</th>
+            </tr>
         </thead>
         <tbody>
-        <?php foreach ($tareas as $t): ?>
+        <?php $idx = 1; foreach ($tareas as $t): ?>
             <?php $tacum = $t['tiempo_acumulado'] ?? $t['tiempo_real']; ?>
             <tr>
-                <td><?= sanitize($t['descripcion']) ?></td>
-                <td><?= format_tiempo($t['tiempo_estimado']) ?></td>
-                <td><?= format_tiempo($tacum) ?></td>
-                <td><?= $t['cerrada'] ? 'Cerrada' : 'Abierta' ?></td>
-                <td><?= sanitize($t['observaciones'] ?? '') ?></td>
+                <td class="text-center">T<?= $idx++ ?></td>
+                <td>
+                    <?= sanitize($t['descripcion']) ?>
+                    <?php if ($t['observaciones']): ?>
+                        <br><small style="color:#666"><em><?= sanitize($t['observaciones']) ?></em></small>
+                    <?php endif; ?>
+                </td>
+                <td class="text-center"><?= (int)$t['tiempo_estimado'] ?>'</td>
+                <td class="text-center"><?= $tacum > 0 ? round($tacum) . "'" : '' ?></td>
+                <td class="text-center"><?= $t['cerrada'] ? '&#10003;' : '' ?></td>
             </tr>
         <?php endforeach; ?>
+        <?php for ($i = count($tareas); $i < 10; $i++): ?>
+            <tr class="empty-row"><td></td><td></td><td></td><td></td><td></td></tr>
+        <?php endfor; ?>
         </tbody>
-        <tfoot>
-            <tr><th>TOTALES</th><th><?= format_tiempo($total_estimado) ?></th><th><?= format_tiempo($total_real) ?></th><th colspan="2"></th></tr>
-        </tfoot>
     </table>
 
-    <div class="section-title">ARTICULOS</div>
+    <!-- Material -->
     <table>
         <thead>
-            <tr><th>Descripcion</th><th>Cantidad</th><th>P. Coste</th><th>P. Venta</th><th>Beneficio</th></tr>
+            <tr>
+                <th>Material</th>
+                <th style="width:15%" class="text-right">Coste</th>
+                <th style="width:15%" class="text-right">Pvp</th>
+            </tr>
         </thead>
         <tbody>
         <?php foreach ($articulos as $a): ?>
             <tr>
-                <td><?= sanitize($a['descripcion']) ?></td>
-                <td><?= (int)$a['cantidad'] ?></td>
-                <td class="text-right"><?= format_euro($a['precio_coste']) ?></td>
-                <td class="text-right"><?= format_euro($a['precio_venta']) ?></td>
-                <td class="text-right"><?= format_euro(($a['precio_venta'] - $a['precio_coste']) * $a['cantidad']) ?></td>
+                <td><?= sanitize($a['descripcion']) ?><?= $a['cantidad'] > 1 ? ' (x'.$a['cantidad'].')' : '' ?></td>
+                <td class="text-right"><?= fe($a['precio_coste'] * $a['cantidad']) ?></td>
+                <td class="text-right"><?= fe($a['precio_venta'] * $a['cantidad']) ?></td>
             </tr>
         <?php endforeach; ?>
-        <?php if (empty($articulos)): ?>
-            <tr><td colspan="5" style="text-align:center;color:#999">Sin articulos</td></tr>
-        <?php endif; ?>
+        <?php for ($i = count($articulos); $i < 6; $i++): ?>
+            <tr class="empty-row"><td></td><td></td><td></td></tr>
+        <?php endfor; ?>
+        <tr class="totals-row">
+            <td class="text-right"><strong>TOTALES</strong></td>
+            <td class="text-right"><?= fe($total_coste) ?></td>
+            <td class="text-right"><?= fe($total_venta) ?></td>
+        </tr>
+        <tr class="totals-row">
+            <td class="text-right"><strong>TIEMPO</strong></td>
+            <td class="text-center" colspan="2"><?= ft($total_estimado) ?> est. / <?= ft($total_real) ?> real</td>
+        </tr>
         </tbody>
-        <tfoot>
-            <tr><th colspan="2">TOTALES</th><th class="text-right"><?= format_euro($total_coste) ?></th><th class="text-right"><?= format_euro($total_venta) ?></th><th class="text-right"><?= format_euro($total_venta - $total_coste) ?></th></tr>
-        </tfoot>
     </table>
 
-    <div class="footer-info">Impreso el <?= date('d/m/Y H:i') ?></div>
+    <div class="print-footer">
+        <span>Parte #<?= $id ?> | Impreso: <?= date('d/m/Y H:i') ?></span>
+        <span>Firma: _______________________________</span>
+    </div>
 
     <script>window.onload = function(){ window.print(); }</script>
 </body>

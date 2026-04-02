@@ -43,6 +43,9 @@
             <a href="admin_dashboard.php" class="sidebar-link <?= navActive('dashboard', $currentPage) ?>">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
+            <a href="admin_kanban.php" class="sidebar-link <?= navActive('kanban', $currentPage) ?>">
+                <i class="bi bi-kanban"></i> Administracion
+            </a>
             <a href="admin_partes.php" class="sidebar-link <?= navActive('parte', $currentPage) ?>">
                 <i class="bi bi-clipboard-data"></i> Partes de Trabajo
             </a>

@@ -142,21 +142,16 @@ require 'header.php';
                     </div>
                 </div>
             </div>
-            <?php if ($parte && $parte['vehiculo_id']): ?>
             <div class="row g-3 mt-1">
                 <div class="col-md-3">
-                    <label class="form-label">Operario asignado</label>
-                    <select name="operador_id" class="form-select">
-                        <option value="">-- Sin asignar --</option>
-                        <?php foreach ($operadores as $op): ?>
-                            <option value="<?= $op['id'] ?>" <?= ($parte['operador_id'] ?? 0)==$op['id']?'selected':'' ?>>
-                                <?= sanitize($op['nombre']) ?>
-                            </option>
-                        <?php endforeach; ?>
+                    <label class="form-label">Prioridad</label>
+                    <select name="prioridad" class="form-select">
+                        <option value="normal" <?= ($parte['prioridad'] ?? 'normal')==='normal'?'selected':'' ?>>Normal</option>
+                        <option value="baja" <?= ($parte['prioridad'] ?? '')==='baja'?'selected':'' ?>>Baja</option>
+                        <option value="alta" <?= ($parte['prioridad'] ?? '')==='alta'?'selected':'' ?>>Alta</option>
                     </select>
                 </div>
             </div>
-            <?php endif; ?>
         </div>
     </div>
 

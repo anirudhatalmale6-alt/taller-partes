@@ -13,6 +13,8 @@ $vehiculo_marca = trim($_POST['vehiculo_marca'] ?? '');
 $vehiculo_modelo = trim($_POST['vehiculo_modelo'] ?? '');
 $matricula = trim($_POST['matricula'] ?? '');
 $operador_id = (int)($_POST['operador_id'] ?? 0) ?: null;
+$prioridad = $_POST['prioridad'] ?? 'normal';
+if (!in_array($prioridad, ['baja','normal','alta'])) $prioridad = 'normal';
 
 if (!$cliente_nombre && !$cliente_id) {
     flash('error', 'El nombre del cliente es obligatorio');
@@ -53,18 +55,18 @@ try {
     }
 
     if ($id > 0) {
-        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=?, cliente_id=?, vehiculo_id=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=?, cliente_id=?, vehiculo_id=?, prioridad=? WHERE id=?");
         $stmt->execute([
             $cliente_nombre, $cliente_apellidos,
             $vehiculo_marca, $vehiculo_modelo,
-            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id, $id
+            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id, $prioridad, $id
         ]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO partes (cliente_nombre, cliente_apellidos, vehiculo_marca, vehiculo_modelo, matricula, telefono, operador_id, cliente_id, vehiculo_id) VALUES (?,?,?,?,?,?,?,?,?)");
+        $stmt = $pdo->prepare("INSERT INTO partes (cliente_nombre, cliente_apellidos, vehiculo_marca, vehiculo_modelo, matricula, telefono, operador_id, cliente_id, vehiculo_id, prioridad) VALUES (?,?,?,?,?,?,?,?,?,?)");
         $stmt->execute([
             $cliente_nombre, $cliente_apellidos,
             $vehiculo_marca, $vehiculo_modelo,
-            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id
+            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id, $prioridad
         ]);
         $id = (int)$pdo->lastInsertId();
     }
