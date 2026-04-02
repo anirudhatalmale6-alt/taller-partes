@@ -24,7 +24,7 @@ $pdo->beginTransaction();
 
 try {
     if ($id > 0) {
-        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=?, updated_at=datetime('now') WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=? WHERE id=?");
         $stmt->execute([
             $data['cliente_nombre'], $data['cliente_apellidos'],
             $data['vehiculo_marca'], $data['vehiculo_modelo'],

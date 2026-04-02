@@ -10,7 +10,7 @@ if (!$parte) { flash('error', 'Parte no encontrado o no asignado'); redirect('op
 
 $tareas = db()->prepare("SELECT t.*,
     (SELECT SUM(r.minutos) FROM registros_tiempo r WHERE r.tarea_id=t.id) as tiempo_acumulado,
-    (SELECT GROUP_CONCAT(r.minutos || ' min' || CASE WHEN r.nota IS NOT NULL AND r.nota!='' THEN ' - ' || r.nota ELSE '' END, '||') FROM registros_tiempo r WHERE r.tarea_id=t.id ORDER BY r.created_at) as registros_detalle
+    (SELECT GROUP_CONCAT(CONCAT(r.minutos, ' min', IF(r.nota IS NOT NULL AND r.nota!='', CONCAT(' - ', r.nota), '')) SEPARATOR '||') FROM registros_tiempo r WHERE r.tarea_id=t.id ORDER BY r.created_at) as registros_detalle
 FROM tareas t WHERE t.parte_id=? ORDER BY t.cerrada ASC, t.id ASC");
 $tareas->execute([$id]);
 $tareas = $tareas->fetchAll();
