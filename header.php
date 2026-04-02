@@ -41,30 +41,34 @@
             $currentPage = basename($_SERVER['PHP_SELF']);
             function navActive($page, $current) { return strpos($current, $page) !== false ? 'active' : ''; }
             ?>
-            <a href="admin_dashboard.php" class="sidebar-link <?= navActive('dashboard', $currentPage) ?>">
-                <i class="bi bi-speedometer2"></i> Dashboard
+            <a href="admin_dashboard.php" class="sidebar-link <?= navActive('dashboard', $currentPage) ?>" title="Dashboard">
+                <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
             </a>
-            <a href="admin_kanban.php" class="sidebar-link <?= navActive('kanban', $currentPage) ?>">
-                <i class="bi bi-kanban"></i> Administracion
+            <a href="admin_kanban.php" class="sidebar-link <?= navActive('kanban', $currentPage) ?>" title="Administracion">
+                <i class="bi bi-kanban"></i> <span>Administracion</span>
             </a>
-            <a href="admin_partes.php" class="sidebar-link <?= navActive('parte', $currentPage) ?>">
-                <i class="bi bi-clipboard-data"></i> Partes de Trabajo
+            <a href="admin_partes.php" class="sidebar-link <?= navActive('parte', $currentPage) ?>" title="Partes de Trabajo">
+                <i class="bi bi-clipboard-data"></i> <span>Partes de Trabajo</span>
             </a>
-            <a href="admin_clientes.php" class="sidebar-link <?= navActive('cliente', $currentPage) ?>">
-                <i class="bi bi-people"></i> Clientes
+            <a href="admin_clientes.php" class="sidebar-link <?= navActive('cliente', $currentPage) ?>" title="Clientes">
+                <i class="bi bi-people"></i> <span>Clientes</span>
             </a>
-            <a href="admin_vehiculos.php" class="sidebar-link <?= navActive('vehiculo', $currentPage) ?>">
-                <i class="bi bi-car-front"></i> Vehiculos
+            <a href="admin_vehiculos.php" class="sidebar-link <?= navActive('vehiculo', $currentPage) ?>" title="Vehiculos">
+                <i class="bi bi-car-front"></i> <span>Vehiculos</span>
             </a>
-            <a href="admin_operadores.php" class="sidebar-link <?= navActive('operador', $currentPage) ?>">
-                <i class="bi bi-person-gear"></i> Operarios
+            <a href="admin_operadores.php" class="sidebar-link <?= navActive('operador', $currentPage) ?>" title="Operarios">
+                <i class="bi bi-person-gear"></i> <span>Operarios</span>
             </a>
             <hr class="border-secondary my-2">
-            <a href="index.php" class="sidebar-link text-secondary">
-                <i class="bi bi-box-arrow-left"></i> Salir
+            <a href="index.php" class="sidebar-link text-secondary" title="Salir">
+                <i class="bi bi-box-arrow-left"></i> <span>Salir</span>
             </a>
         </nav>
     </div>
+    <!-- Sidebar collapse toggle (desktop) -->
+    <button class="sidebar-collapse-btn no-print" id="sidebarCollapseBtn" title="Replegar menu">
+        <i class="bi bi-chevron-left" id="collapseIcon"></i>
+    </button>
     <!-- Page content -->
     <div class="flex-grow-1" id="page-content">
         <!-- Top bar mobile toggle -->

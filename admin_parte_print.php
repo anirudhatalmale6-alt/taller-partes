@@ -95,6 +95,11 @@ ob_start();
         }
         .print-footer table { width: 100%; }
         .print-footer td { border: none; padding: 0; }
+
+        /* Diagnostico page styles */
+        .dc { padding: 4px 6px; font-size: 10px; border: 1px solid #ddd; }
+        .dline { color: #999; }
+        .cb { display: inline-block; width: 10px; height: 10px; border: 1px solid #555; margin-right: 4px; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -192,6 +197,166 @@ ob_start();
             <td>Parte #<?= $id ?> | Generado: <?= date('d/m/Y H:i') ?></td>
             <td style="text-align:right">Firma: _______________________________</td>
         </tr></table>
+    </div>
+
+    <!-- PAGE 2: Diagnostico -->
+    <div style="page-break-before: always;"></div>
+
+    <div style="text-align:center; margin-bottom:10px;">
+        <?php if ($logoBase64): ?>
+            <img src="<?= $logoBase64 ?>" style="height:50px; margin-bottom:4px;"><br>
+        <?php endif; ?>
+    </div>
+
+    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Check &amp; Diagn&oacute;stico</td></tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Embrague</td>
+            <td class="dc dline">____________________</td>
+            <td class="dc"><span class="cb"></span> Fugas en motor</td>
+            <td class="dc dline">____________________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Distribuci&oacute;n</td>
+            <td class="dc dline">____________________</td>
+            <td class="dc" colspan="2"></td>
+        </tr>
+        <tr>
+            <td class="dc" colspan="2">Km del cambio ______________________</td>
+            <td class="dc" colspan="2">Km actuales ______________________</td>
+        </tr>
+    </table>
+
+    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Frenos</td></tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Discos de freno delanteros</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Discos de freno traseros</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Latiguillos de freno delanteros</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Latiguillos de freno traseros</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Pastillas de freno delanteros</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Pastillas de freno traseros</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Tambor de freno delanteros</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Tambor de freno traseros</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Bombas de freno delanteros</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Bomb&iacute;n de freno traseros</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Zapatas de freno delanteros</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Zapatas de freno traseros</td>
+            <td class="dc dline">______________</td>
+        </tr>
+    </table>
+
+    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Neum&aacute;ticos</td></tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Neum&aacute;tico delantero derecho</td>
+            <td class="dc" colspan="1"></td>
+            <td class="dc"><span class="cb"></span> Neum&aacute;tico delantero izquierdo</td>
+            <td class="dc"></td>
+        </tr>
+        <tr>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
+            <td class="dc"></td>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
+            <td class="dc"></td>
+        </tr>
+        <tr>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
+            <td class="dc"></td>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
+            <td class="dc"></td>
+        </tr>
+        <tr>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
+            <td class="dc">BAR</td>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
+            <td class="dc">BAR</td>
+        </tr>
+        <tr><td class="dc" colspan="4" style="height:4px;"></td></tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Neum&aacute;tico trasero derecho</td>
+            <td class="dc"></td>
+            <td class="dc"><span class="cb"></span> Neum&aacute;tico trasero izquierdo</td>
+            <td class="dc"></td>
+        </tr>
+        <tr>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
+            <td class="dc"></td>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Nivel de desgaste ______________</td>
+            <td class="dc"></td>
+        </tr>
+        <tr>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
+            <td class="dc"></td>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Consumo correcto ______________</td>
+            <td class="dc"></td>
+        </tr>
+        <tr>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
+            <td class="dc">BAR</td>
+            <td class="dc">&nbsp;&nbsp;&nbsp;Presi&oacute;n aire ______________</td>
+            <td class="dc">BAR</td>
+        </tr>
+    </table>
+
+    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Niveles</td></tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Nivel de aceite</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Nivel de l&iacute;quido de direcci&oacute;n</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Nivel de refrigerante</td>
+            <td class="dc dline">______________</td>
+            <td class="dc"><span class="cb"></span> Nivel de agua en limpiaparabrisas</td>
+            <td class="dc dline">______________</td>
+        </tr>
+        <tr>
+            <td class="dc"><span class="cb"></span> Nivel de l&iacute;quido de freno</td>
+            <td class="dc dline">______________</td>
+            <td class="dc" colspan="2"></td>
+        </tr>
+    </table>
+
+    <table class="diag" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <tr><td colspan="4" style="background:#555; color:#fff; font-weight:bold; text-align:center; padding:5px; font-size:12px;">Prueba din&aacute;mica</td></tr>
+        <tr>
+            <td class="dc" colspan="2">Kil&oacute;metro salida ______________ Km</td>
+            <td class="dc" colspan="2">Kil&oacute;metro salida ______________ Km</td>
+        </tr>
+        <tr>
+            <td class="dc" colspan="2">Kil&oacute;metro llegada ______________ Km</td>
+            <td class="dc" colspan="2">Kil&oacute;metro llegada ______________ Km</td>
+        </tr>
+    </table>
+
+    <div style="margin-top:10px; font-size:10px;">
+        Observaciones: ____________________________________________________________________________<br><br>
+        ____________________________________________________________________________<br><br>
+        ____________________________________________________________________________
     </div>
 
 </body>

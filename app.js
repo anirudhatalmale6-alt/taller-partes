@@ -25,6 +25,23 @@ document.addEventListener('DOMContentLoaded', function() {
             overlay.classList.remove('show');
         });
     }
+
+    // Sidebar collapse (desktop)
+    var collapseBtn = document.getElementById('sidebarCollapseBtn');
+    var collapseIcon = document.getElementById('collapseIcon');
+    if (collapseBtn && sidebar) {
+        // Restore state from localStorage
+        if (localStorage.getItem('sidebarCollapsed') === '1') {
+            sidebar.classList.add('collapsed');
+            collapseIcon.className = 'bi bi-chevron-right';
+        }
+        collapseBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            var isCollapsed = sidebar.classList.contains('collapsed');
+            collapseIcon.className = isCollapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left';
+            localStorage.setItem('sidebarCollapsed', isCollapsed ? '1' : '0');
+        });
+    }
 });
 
 // Autocomplete helper
