@@ -1,6 +1,46 @@
-/* Custom styles */
-body { background: #f5f6fa; }
+/* Base */
+body { background: #f5f6fa; font-size: 0.95rem; }
 
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 1000;
+    transition: transform 0.3s;
+    overflow-y: auto;
+}
+.sidebar-header { font-size: 1rem; }
+.sidebar-link {
+    display: block;
+    padding: 10px 14px;
+    color: #adb5bd;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-bottom: 2px;
+    font-size: 0.9rem;
+    transition: background 0.15s, color 0.15s;
+}
+.sidebar-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.sidebar-link.active { background: #0d6efd; color: #fff; }
+.sidebar-link i { width: 22px; display: inline-block; }
+
+#page-content { margin-left: 240px; min-height: 100vh; width: calc(100% - 240px); }
+
+@media (max-width: 991.98px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.show { transform: translateX(0); }
+    #page-content { margin-left: 0; width: 100%; }
+    .sidebar-overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 999; display: none;
+    }
+    .sidebar-overlay.show { display: block; }
+}
+
+/* Stat cards */
 .card-stat {
     border-left: 4px solid;
     transition: transform 0.15s;
@@ -11,6 +51,7 @@ body { background: #f5f6fa; }
 .card-stat.orange { border-left-color: #fd7e14; }
 .card-stat.red    { border-left-color: #dc3545; }
 
+/* Badges */
 .badge-abierto { background-color: #198754; }
 .badge-cerrado { background-color: #6c757d; }
 
@@ -23,23 +64,7 @@ body { background: #f5f6fa; }
     margin: 5px;
 }
 
-/* Timer */
-.timer-display {
-    font-size: 1.3rem;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    color: #0d6efd;
-}
-.timer-display.running { color: #dc3545; }
-
-/* Print */
-@media print {
-    .no-print, .navbar, .alert, .btn { display: none !important; }
-    body { background: #fff; }
-    .container-fluid { padding: 0 !important; }
-}
-
-/* Mobile task cards */
+/* Task cards (operator) */
 .task-card {
     border-left: 4px solid #0d6efd;
     margin-bottom: 1rem;
@@ -49,9 +74,40 @@ body { background: #f5f6fa; }
 /* Responsive table */
 .table-responsive { -webkit-overflow-scrolling: touch; }
 
-/* Operator mode big buttons */
+/* Operator big buttons */
 .btn-op {
     padding: 12px 20px;
     font-size: 1.1rem;
     border-radius: 12px;
 }
+
+/* Print */
+@media print {
+    .no-print, .sidebar, .navbar, .alert, .btn, #sidebar { display: none !important; }
+    #page-content { margin-left: 0 !important; width: 100% !important; }
+    body { background: #fff; }
+    .content-area { padding: 0 !important; }
+}
+
+/* Autocomplete dropdown */
+.autocomplete-list {
+    position: absolute;
+    z-index: 1050;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    max-height: 250px;
+    overflow-y: auto;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+.autocomplete-item:hover, .autocomplete-item.active {
+    background: #e9ecef;
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item small { color: #6c757d; }

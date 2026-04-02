@@ -51,14 +51,24 @@ foreach ($articulos as $a) {
 <div class="card shadow-sm mb-3">
     <div class="card-body">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <h6 class="text-muted mb-1">Cliente</h6>
-                <p class="mb-1"><strong><?= sanitize($parte['cliente_nombre'] . ' ' . $parte['cliente_apellidos']) ?></strong></p>
+                <p class="mb-1">
+                    <strong><?= sanitize($parte['cliente_nombre'] . ' ' . $parte['cliente_apellidos']) ?></strong>
+                    <?php if ($parte['cliente_id']): ?>
+                        <a href="admin_cliente_ver.php?id=<?= $parte['cliente_id'] ?>" class="btn btn-sm btn-outline-primary ms-1" title="Ver ficha"><i class="bi bi-eye"></i></a>
+                    <?php endif; ?>
+                </p>
                 <p class="mb-0"><i class="bi bi-telephone"></i> <?= sanitize($parte['telefono'] ?: 'N/A') ?></p>
             </div>
             <div class="col-md-4">
                 <h6 class="text-muted mb-1">Vehiculo</h6>
-                <p class="mb-1"><?= sanitize($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?></p>
+                <p class="mb-1">
+                    <?= sanitize($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?>
+                    <?php if ($parte['vehiculo_id']): ?>
+                        <a href="admin_vehiculo_ver.php?id=<?= $parte['vehiculo_id'] ?>" class="btn btn-sm btn-outline-primary ms-1" title="Ver historial"><i class="bi bi-eye"></i></a>
+                    <?php endif; ?>
+                </p>
                 <p class="mb-0"><strong>Matricula:</strong> <?= sanitize($parte['matricula']) ?></p>
             </div>
             <div class="col-md-2">

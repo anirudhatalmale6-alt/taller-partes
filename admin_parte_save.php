@@ -4,17 +4,17 @@ require 'config.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') redirect('admin_partes.php');
 
 $id = (int)($_POST['id'] ?? 0);
-$data = [
-    'cliente_nombre'    => trim($_POST['cliente_nombre'] ?? ''),
-    'cliente_apellidos' => trim($_POST['cliente_apellidos'] ?? ''),
-    'vehiculo_marca'    => trim($_POST['vehiculo_marca'] ?? ''),
-    'vehiculo_modelo'   => trim($_POST['vehiculo_modelo'] ?? ''),
-    'matricula'         => trim($_POST['matricula'] ?? ''),
-    'telefono'          => trim($_POST['telefono'] ?? ''),
-    'operador_id'       => (int)($_POST['operador_id'] ?? 0) ?: null,
-];
+$cliente_id = (int)($_POST['cliente_id'] ?? 0);
+$vehiculo_id = (int)($_POST['vehiculo_id'] ?? 0);
+$cliente_nombre = trim($_POST['cliente_nombre'] ?? '');
+$cliente_apellidos = trim($_POST['cliente_apellidos'] ?? '');
+$telefono = trim($_POST['telefono'] ?? '');
+$vehiculo_marca = trim($_POST['vehiculo_marca'] ?? '');
+$vehiculo_modelo = trim($_POST['vehiculo_modelo'] ?? '');
+$matricula = trim($_POST['matricula'] ?? '');
+$operador_id = (int)($_POST['operador_id'] ?? 0) ?: null;
 
-if (!$data['cliente_nombre']) {
+if (!$cliente_nombre && !$cliente_id) {
     flash('error', 'El nombre del cliente es obligatorio');
     redirect($id ? "admin_parte_form.php?id=$id" : 'admin_parte_form.php');
 }
@@ -23,19 +23,48 @@ $pdo = db();
 $pdo->beginTransaction();
 
 try {
+    // Auto-create or use existing client
+    if (!$cliente_id && $cliente_nombre) {
+        // Check if client with same name+phone exists
+        $existing = $pdo->prepare("SELECT id FROM clientes WHERE nombre=? AND apellidos=? AND telefono=?");
+        $existing->execute([$cliente_nombre, $cliente_apellidos, $telefono]);
+        $found = $existing->fetch();
+        if ($found) {
+            $cliente_id = (int)$found['id'];
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO clientes (nombre, apellidos, telefono) VALUES (?,?,?)");
+            $stmt->execute([$cliente_nombre, $cliente_apellidos, $telefono]);
+            $cliente_id = (int)$pdo->lastInsertId();
+        }
+    }
+
+    // Auto-create or use existing vehicle
+    if (!$vehiculo_id && $matricula && $cliente_id) {
+        $existing = $pdo->prepare("SELECT id FROM vehiculos WHERE matricula=?");
+        $existing->execute([$matricula]);
+        $found = $existing->fetch();
+        if ($found) {
+            $vehiculo_id = (int)$found['id'];
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO vehiculos (cliente_id, marca, modelo, matricula) VALUES (?,?,?,?)");
+            $stmt->execute([$cliente_id, $vehiculo_marca, $vehiculo_modelo, $matricula]);
+            $vehiculo_id = (int)$pdo->lastInsertId();
+        }
+    }
+
     if ($id > 0) {
-        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE partes SET cliente_nombre=?, cliente_apellidos=?, vehiculo_marca=?, vehiculo_modelo=?, matricula=?, telefono=?, operador_id=?, cliente_id=?, vehiculo_id=? WHERE id=?");
         $stmt->execute([
-            $data['cliente_nombre'], $data['cliente_apellidos'],
-            $data['vehiculo_marca'], $data['vehiculo_modelo'],
-            $data['matricula'], $data['telefono'], $data['operador_id'], $id
+            $cliente_nombre, $cliente_apellidos,
+            $vehiculo_marca, $vehiculo_modelo,
+            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id, $id
         ]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO partes (cliente_nombre, cliente_apellidos, vehiculo_marca, vehiculo_modelo, matricula, telefono, operador_id) VALUES (?,?,?,?,?,?,?)");
+        $stmt = $pdo->prepare("INSERT INTO partes (cliente_nombre, cliente_apellidos, vehiculo_marca, vehiculo_modelo, matricula, telefono, operador_id, cliente_id, vehiculo_id) VALUES (?,?,?,?,?,?,?,?,?)");
         $stmt->execute([
-            $data['cliente_nombre'], $data['cliente_apellidos'],
-            $data['vehiculo_marca'], $data['vehiculo_modelo'],
-            $data['matricula'], $data['telefono'], $data['operador_id']
+            $cliente_nombre, $cliente_apellidos,
+            $vehiculo_marca, $vehiculo_modelo,
+            $matricula, $telefono, $operador_id, $cliente_id, $vehiculo_id
         ]);
         $id = (int)$pdo->lastInsertId();
     }
@@ -61,7 +90,6 @@ try {
         }
     }
 
-    // Delete removed tareas (only those without time entries)
     if (!empty($submitted_tarea_ids)) {
         $placeholders = implode(',', array_fill(0, count($submitted_tarea_ids), '?'));
         $pdo->prepare("DELETE FROM tareas WHERE parte_id=? AND id NOT IN ($placeholders) AND cerrada=0 AND tiempo_real=0")

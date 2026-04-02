@@ -10,36 +10,67 @@
 </head>
 <body>
 <?php $isOp = is_operador(); ?>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 no-print">
+
+<?php if ($isOp): ?>
+<!-- OPERATOR: top navbar only -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-3 no-print">
     <div class="container-fluid">
-        <a class="navbar-brand" href="index.php">
-            <i class="bi bi-wrench-adjustable"></i> <?= sanitize(APP_NAME) ?>
+        <a class="navbar-brand" href="operador_partes.php">
+            <i class="bi bi-wrench-adjustable"></i> Taller - Operario
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMain">
-            <?php if ($isOp): ?>
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="operador_partes.php">Mis Partes</a></li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <span class="nav-link text-info"><i class="bi bi-person-badge"></i> <?= sanitize(operador_nombre()) ?></span>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="operador_logout.php">Salir</a></li>
-            </ul>
-            <?php else: ?>
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="admin_dashboard.php">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="admin_partes.php">Partes</a></li>
-                <li class="nav-item"><a class="nav-link" href="admin_operadores.php">Operarios</a></li>
-            </ul>
-            <?php endif; ?>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3"><i class="bi bi-person-badge"></i> <?= sanitize(operador_nombre()) ?></span>
+            <a href="operador_logout.php" class="btn btn-outline-light btn-sm">Salir</a>
         </div>
     </div>
 </nav>
-<div class="container-fluid px-3 px-md-4">
+<div class="container-fluid px-3">
+<?php else: ?>
+<!-- ADMIN: sidebar layout -->
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar bg-dark text-white no-print" id="sidebar">
+        <div class="sidebar-header p-3 border-bottom border-secondary">
+            <h6 class="mb-0"><i class="bi bi-wrench-adjustable"></i> Taller Admin</h6>
+        </div>
+        <nav class="sidebar-nav p-2">
+            <?php
+            $currentPage = basename($_SERVER['PHP_SELF']);
+            function navActive($page, $current) { return strpos($current, $page) !== false ? 'active' : ''; }
+            ?>
+            <a href="admin_dashboard.php" class="sidebar-link <?= navActive('dashboard', $currentPage) ?>">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="admin_partes.php" class="sidebar-link <?= navActive('parte', $currentPage) ?>">
+                <i class="bi bi-clipboard-data"></i> Partes de Trabajo
+            </a>
+            <a href="admin_clientes.php" class="sidebar-link <?= navActive('cliente', $currentPage) ?>">
+                <i class="bi bi-people"></i> Clientes
+            </a>
+            <a href="admin_vehiculos.php" class="sidebar-link <?= navActive('vehiculo', $currentPage) ?>">
+                <i class="bi bi-car-front"></i> Vehiculos
+            </a>
+            <a href="admin_operadores.php" class="sidebar-link <?= navActive('operador', $currentPage) ?>">
+                <i class="bi bi-person-gear"></i> Operarios
+            </a>
+            <hr class="border-secondary my-2">
+            <a href="index.php" class="sidebar-link text-secondary">
+                <i class="bi bi-box-arrow-left"></i> Salir
+            </a>
+        </nav>
+    </div>
+    <!-- Page content -->
+    <div class="flex-grow-1" id="page-content">
+        <!-- Top bar mobile toggle -->
+        <nav class="navbar navbar-light bg-white border-bottom d-lg-none no-print mb-3">
+            <div class="container-fluid">
+                <button class="btn btn-outline-dark" id="sidebarToggle"><i class="bi bi-list"></i></button>
+                <span class="navbar-text fw-bold"><?= sanitize($pageTitle ?? '') ?></span>
+            </div>
+        </nav>
+        <div class="content-area px-3 px-lg-4">
+<?php endif; ?>
+
 <?php
 $flash_ok = get_flash('ok');
 $flash_err = get_flash('error');
