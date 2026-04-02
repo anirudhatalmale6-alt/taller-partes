@@ -1,5 +1,10 @@
 <?php
 require 'config.php';
+require __DIR__ . '/vendor/autoload.php';
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 $id = (int)($_GET['id'] ?? 0);
 
 $parte = db()->prepare("SELECT p.*, o.nombre as operador_nombre FROM partes p LEFT JOIN operadores o ON p.operador_id=o.id WHERE p.id=?");
@@ -21,21 +26,21 @@ foreach ($tareas as $t) $total_real += ($t['tiempo_acumulado'] ?? $t['tiempo_rea
 $total_coste = 0; $total_venta = 0;
 foreach ($articulos as $a) { $total_coste += $a['precio_coste']*$a['cantidad']; $total_venta += $a['precio_venta']*$a['cantidad']; }
 
-// Format time as Xh Ym
 function ft($min) { $min=(float)$min; $h=floor($min/60); $m=round($min%60); return $h>0?"{$h}h {$m}m":"{$m}m"; }
-function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
+function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' &euro;'; }
+
+// Build HTML for PDF
+ob_start();
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Parte #<?= $id ?></title>
     <style>
-        @page { margin: 15mm 12mm; size: A4; }
+        @page { margin: 15mm 12mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #222; padding: 10px; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
 
-        /* Header */
         .print-header {
             text-align: center; padding: 12px 0 8px;
             border-bottom: 3px solid #222; margin-bottom: 10px;
@@ -43,44 +48,24 @@ function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
         .print-header h1 { font-size: 22px; letter-spacing: 2px; margin-bottom: 2px; }
         .print-header .subtitle { font-size: 11px; color: #555; }
 
-        /* Vehicle line */
         .vehicle-line {
             font-size: 14px; font-weight: bold; padding: 8px 0 6px;
             border-bottom: 1px solid #ccc; margin-bottom: 8px;
         }
 
-        /* Info row */
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
-        .info-row .field { }
-        .info-row .field label { font-weight: bold; color: #555; font-size: 9px; text-transform: uppercase; display: block; }
+        .info-table { width: 100%; margin-bottom: 8px; }
+        .info-table td { padding: 2px 0; vertical-align: top; }
+        .info-table .lbl { font-weight: bold; color: #555; font-size: 9px; text-transform: uppercase; }
 
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        th { background: #333; color: #fff; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        th, td { border: 1px solid #bbb; padding: 5px 8px; text-align: left; }
-        td { font-size: 11px; }
-        tbody tr:nth-child(even) { background: #f9f9f9; }
-        tbody tr.empty-row td { border-left: 1px solid #bbb; border-right: 1px solid #bbb; height: 22px; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
+        table.data { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        table.data th { background: #333; color: #fff; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        table.data th, table.data td { border: 1px solid #bbb; padding: 5px 8px; text-align: left; }
+        table.data td { font-size: 11px; }
+        table.data .text-right { text-align: right; }
+        table.data .text-center { text-align: center; }
+        table.data .totals-row { font-weight: bold; background: #f0f0f0; }
+        table.data .empty-row td { height: 22px; }
 
-        /* Section titles */
-        .section-title {
-            font-size: 11px; font-weight: bold; text-transform: uppercase;
-            padding: 4px 8px; background: #eee; border: 1px solid #bbb;
-            border-bottom: none; letter-spacing: 0.5px;
-        }
-
-        /* Totals */
-        .totals-row { font-weight: bold; background: #f0f0f0; }
-
-        /* Footer */
-        .print-footer {
-            margin-top: 20px; padding-top: 8px; border-top: 1px solid #ccc;
-            font-size: 9px; color: #999; display: flex; justify-content: space-between;
-        }
-
-        /* Priority indicator */
         .priority-badge {
             display: inline-block; padding: 1px 8px; font-size: 9px;
             border-radius: 3px; font-weight: bold; text-transform: uppercase;
@@ -89,35 +74,38 @@ function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
         .priority-normal { background: #d6e9f8; color: #084298; }
         .priority-alta { background: #f8d7da; color: #842029; }
 
-        @media print { body { padding: 0; } }
+        .print-footer {
+            margin-top: 20px; padding-top: 8px; border-top: 1px solid #ccc;
+            font-size: 9px; color: #999;
+        }
+        .print-footer table { width: 100%; }
+        .print-footer td { border: none; padding: 0; }
     </style>
 </head>
 <body>
 
-    <!-- Header with business name -->
     <div class="print-header">
         <h1>PARTE DE TRABAJO</h1>
         <div class="subtitle">N&ordm; <?= $id ?> | <?= date('d/m/Y', strtotime($parte['created_at'])) ?></div>
     </div>
 
-    <!-- Vehicle line (prominent, like the sample) -->
     <div class="vehicle-line">
-        <?= sanitize($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?> - <?= sanitize($parte['matricula']) ?>
+        <?= htmlspecialchars($parte['vehiculo_marca'] . ' ' . $parte['vehiculo_modelo']) ?> - <?= htmlspecialchars($parte['matricula']) ?>
         <span class="priority-badge priority-<?= $parte['prioridad'] ?? 'normal' ?>" style="float:right; margin-top:2px">
             <?= ucfirst($parte['prioridad'] ?? 'normal') ?>
         </span>
     </div>
 
-    <!-- Client info -->
-    <div class="info-row">
-        <div class="field"><label>Cliente</label><?= sanitize($parte['cliente_nombre'] . ' ' . $parte['cliente_apellidos']) ?></div>
-        <div class="field"><label>Telefono</label><?= sanitize($parte['telefono'] ?: 'N/A') ?></div>
-        <div class="field"><label>Operario</label><?= sanitize($parte['operador_nombre'] ?? 'Sin asignar') ?></div>
-        <div class="field"><label>Estado</label><?= ucfirst($parte['estado']) ?></div>
-    </div>
+    <table class="info-table">
+        <tr>
+            <td style="width:25%"><span class="lbl">Cliente</span><br><?= htmlspecialchars($parte['cliente_nombre'] . ' ' . $parte['cliente_apellidos']) ?></td>
+            <td style="width:25%"><span class="lbl">Telefono</span><br><?= htmlspecialchars($parte['telefono'] ?: 'N/A') ?></td>
+            <td style="width:25%"><span class="lbl">Operario</span><br><?= htmlspecialchars($parte['operador_nombre'] ?? 'Sin asignar') ?></td>
+            <td style="width:25%"><span class="lbl">Estado</span><br><?= ucfirst($parte['estado']) ?></td>
+        </tr>
+    </table>
 
-    <!-- Trabajos a realizar -->
-    <table>
+    <table class="data">
         <thead>
             <tr>
                 <th style="width:6%">Id</th>
@@ -133,9 +121,9 @@ function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
             <tr>
                 <td class="text-center">T<?= $idx++ ?></td>
                 <td>
-                    <?= sanitize($t['descripcion']) ?>
+                    <?= htmlspecialchars($t['descripcion']) ?>
                     <?php if ($t['observaciones']): ?>
-                        <br><small style="color:#666"><em><?= sanitize($t['observaciones']) ?></em></small>
+                        <br><small style="color:#666"><em><?= htmlspecialchars($t['observaciones']) ?></em></small>
                     <?php endif; ?>
                 </td>
                 <td class="text-center"><?= (int)$t['tiempo_estimado'] ?>'</td>
@@ -149,8 +137,7 @@ function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
         </tbody>
     </table>
 
-    <!-- Material -->
-    <table>
+    <table class="data">
         <thead>
             <tr>
                 <th>Material</th>
@@ -161,7 +148,7 @@ function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
         <tbody>
         <?php foreach ($articulos as $a): ?>
             <tr>
-                <td><?= sanitize($a['descripcion']) ?><?= $a['cantidad'] > 1 ? ' (x'.$a['cantidad'].')' : '' ?></td>
+                <td><?= htmlspecialchars($a['descripcion']) ?><?= $a['cantidad'] > 1 ? ' (x'.$a['cantidad'].')' : '' ?></td>
                 <td class="text-right"><?= fe($a['precio_coste'] * $a['cantidad']) ?></td>
                 <td class="text-right"><?= fe($a['precio_venta'] * $a['cantidad']) ?></td>
             </tr>
@@ -182,10 +169,25 @@ function fe($amt) { return number_format((float)$amt, 2, ',', '.') . ' €'; }
     </table>
 
     <div class="print-footer">
-        <span>Parte #<?= $id ?> | Impreso: <?= date('d/m/Y H:i') ?></span>
-        <span>Firma: _______________________________</span>
+        <table><tr>
+            <td>Parte #<?= $id ?> | Generado: <?= date('d/m/Y H:i') ?></td>
+            <td style="text-align:right">Firma: _______________________________</td>
+        </tr></table>
     </div>
 
-    <script>window.onload = function(){ window.print(); }</script>
 </body>
 </html>
+<?php
+$html = ob_get_clean();
+
+$options = new Options();
+$options->set('isRemoteEnabled', false);
+$options->set('defaultFont', 'Helvetica');
+
+$dompdf = new Dompdf($options);
+$dompdf->loadHtml($html);
+$dompdf->setPaper('A4', 'portrait');
+$dompdf->render();
+
+$filename = 'Parte_' . $id . '_' . date('Ymd') . '.pdf';
+$dompdf->stream($filename, ['Attachment' => true]);
