@@ -1,0 +1,57 @@
+/* Custom styles */
+body { background: #f5f6fa; }
+
+.card-stat {
+    border-left: 4px solid;
+    transition: transform 0.15s;
+}
+.card-stat:hover { transform: translateY(-2px); }
+.card-stat.blue   { border-left-color: #0d6efd; }
+.card-stat.green  { border-left-color: #198754; }
+.card-stat.orange { border-left-color: #fd7e14; }
+.card-stat.red    { border-left-color: #dc3545; }
+
+.badge-abierto { background-color: #198754; }
+.badge-cerrado { background-color: #6c757d; }
+
+/* Operator PIN pad */
+.pin-container { max-width: 320px; margin: 60px auto; }
+.pin-btn {
+    width: 70px; height: 70px;
+    font-size: 1.5rem; font-weight: 600;
+    border-radius: 50%;
+    margin: 5px;
+}
+
+/* Timer */
+.timer-display {
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: #0d6efd;
+}
+.timer-display.running { color: #dc3545; }
+
+/* Print */
+@media print {
+    .no-print, .navbar, .alert, .btn { display: none !important; }
+    body { background: #fff; }
+    .container-fluid { padding: 0 !important; }
+}
+
+/* Mobile task cards */
+.task-card {
+    border-left: 4px solid #0d6efd;
+    margin-bottom: 1rem;
+}
+.task-card.cerrada { border-left-color: #198754; opacity: 0.7; }
+
+/* Responsive table */
+.table-responsive { -webkit-overflow-scrolling: touch; }
+
+/* Operator mode big buttons */
+.btn-op {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+}
