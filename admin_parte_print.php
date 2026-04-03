@@ -63,15 +63,15 @@ ob_start();
     <style>
         @page { margin: 18mm 20mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "Dosis", Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        body { font-family: "Dosis", Helvetica, Arial, sans-serif; font-size: 12px; color: #000; }
 
         .print-header {
             text-align: center; padding: 4px 0 4px;
-            border-bottom: 3px solid #222; margin-bottom: 6px;
+            border-bottom: 3px solid #000; margin-bottom: 6px;
         }
         .print-header img { height: 100px; margin-bottom: 2px; }
         .print-header h1 { font-size: 20px; letter-spacing: 2px; margin-bottom: 2px; font-weight: 700; }
-        .print-header .subtitle { font-size: 11px; color: #555; }
+        .print-header .subtitle { font-size: 11px; color: #333; }
 
         .vehicle-line {
             font-size: 14px; font-weight: 700; padding: 8px 0 6px;
@@ -80,12 +80,12 @@ ob_start();
 
         .info-table { width: 100%; margin-bottom: 4px; }
         .info-table td { padding: 2px 0; vertical-align: top; }
-        .info-table .lbl { font-weight: 700; color: #555; font-size: 9px; text-transform: uppercase; }
+        .info-table .lbl { font-weight: 700; color: #333; font-size: 9px; text-transform: uppercase; }
 
         table.data { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
-        table.data th { background: #333; color: #fff; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-        table.data th, table.data td { border: 1px solid #bbb; padding: 3px 6px; text-align: left; }
-        table.data td { font-size: 10px; }
+        table.data th { background: #111; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        table.data th, table.data td { border: 1px solid #666; padding: 4px 6px; text-align: left; }
+        table.data td { font-size: 11px; }
         table.data .text-right { text-align: right; }
         table.data .text-center { text-align: center; }
         table.data .totals-row { font-weight: 700; background: #f0f0f0; }
@@ -100,8 +100,8 @@ ob_start();
         .priority-alta { background: #f8d7da; color: #842029; }
 
         .print-footer {
-            margin-top: 20px; padding-top: 8px; border-top: 1px solid #ccc;
-            font-size: 9px; color: #999;
+            margin-top: 20px; padding-top: 8px; border-top: 1px solid #666;
+            font-size: 9px; color: #555;
         }
         .print-footer table { width: 100%; }
         .print-footer td { border: none; padding: 0; }
@@ -174,8 +174,8 @@ ob_start();
         <thead>
             <tr>
                 <th>Material</th>
-                <th style="width:15%" class="text-right">Coste</th>
-                <th style="width:15%" class="text-right">Pvp</th>
+                <th style="width:15%" class="text-center">Coste</th>
+                <th style="width:15%" class="text-center">Pvp</th>
             </tr>
         </thead>
         <tbody>
@@ -232,4 +232,4 @@ $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
 $filename = 'Parte_' . $id . '_' . date('Ymd') . '.pdf';
-$dompdf->stream($filename, ['Attachment' => true]);
+$dompdf->stream($filename, ['Attachment' => false]);

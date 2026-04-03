@@ -217,7 +217,7 @@ require 'header.php';
                         <input type="hidden" name="articulos[<?= $i ?>][id]" value="<?= $a['id'] ?>">
                         <input type="text" name="articulos[<?= $i ?>][descripcion]" class="form-control form-control-sm" required value="<?= sanitize($a['descripcion']) ?>">
                     </td>
-                    <td><input type="number" name="articulos[<?= $i ?>][cantidad]" class="form-control form-control-sm" min="1" value="<?= (int)$a['cantidad'] ?>"></td>
+                    <td><input type="number" name="articulos[<?= $i ?>][cantidad]" class="form-control form-control-sm" min="0.01" step="0.01" value="<?= $a['cantidad'] ?>"></td>
                     <td><input type="number" name="articulos[<?= $i ?>][precio_coste]" class="form-control form-control-sm" min="0" step="0.01" value="<?= $a['precio_coste'] ?>"></td>
                     <td><input type="number" name="articulos[<?= $i ?>][precio_venta]" class="form-control form-control-sm" min="0" step="0.01" value="<?= $a['precio_venta'] ?>"></td>
                     <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
@@ -255,7 +255,7 @@ function addArticulo() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td><input type="text" name="articulos[${artIdx}][descripcion]" class="form-control form-control-sm" required placeholder="Descripcion"></td>
-        <td><input type="number" name="articulos[${artIdx}][cantidad]" class="form-control form-control-sm" min="1" value="1"></td>
+        <td><input type="number" name="articulos[${artIdx}][cantidad]" class="form-control form-control-sm" min="0.01" step="0.01" value="1"></td>
         <td><input type="number" name="articulos[${artIdx}][precio_coste]" class="form-control form-control-sm" min="0" step="0.01" value="0"></td>
         <td><input type="number" name="articulos[${artIdx}][precio_venta]" class="form-control form-control-sm" min="0" step="0.01" value="0"></td>
         <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>

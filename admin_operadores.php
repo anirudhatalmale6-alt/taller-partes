@@ -33,13 +33,15 @@ require 'header.php';
 <div class="table-responsive">
 <table class="table table-hover mb-0">
     <thead class="table-light">
-        <tr><th>Nombre</th><th>PIN</th><th>Estado</th><th>Acciones</th></tr>
+        <tr><th>Nombre</th><th>PIN</th><th>Coste/hora</th><th>Tiempo op. (min/dia)</th><th>Estado</th><th>Acciones</th></tr>
     </thead>
     <tbody>
     <?php foreach ($operadores as $op): ?>
         <tr class="<?= $op['activo'] ? '' : 'table-secondary' ?>">
             <td><?= sanitize($op['nombre']) ?></td>
             <td><code><?= sanitize($op['pin']) ?></code></td>
+            <td><?= number_format((float)($op['coste_hora'] ?? 0), 2, ',', '.') ?> &euro;/h</td>
+            <td><?= (int)($op['tiempo_operativo'] ?? 480) ?> min</td>
             <td>
                 <?php if ($op['activo']): ?>
                     <span class="badge bg-success">Activo</span>
@@ -48,7 +50,7 @@ require 'header.php';
                 <?php endif; ?>
             </td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="editOp(<?= $op['id'] ?>, '<?= sanitize($op['nombre']) ?>', '<?= sanitize($op['pin']) ?>')">
+                <button class="btn btn-sm btn-outline-primary" onclick="editOp(<?= $op['id'] ?>, '<?= sanitize($op['nombre']) ?>', '<?= sanitize($op['pin']) ?>', <?= (float)($op['coste_hora'] ?? 0) ?>, <?= (int)($op['tiempo_operativo'] ?? 480) ?>)">
                     <i class="bi bi-pencil"></i>
                 </button>
                 <?php if ($op['activo']): ?>
@@ -60,7 +62,7 @@ require 'header.php';
         </tr>
     <?php endforeach; ?>
     <?php if (empty($operadores)): ?>
-        <tr><td colspan="4" class="text-center text-muted py-4">No hay operarios registrados</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">No hay operarios registrados</td></tr>
     <?php endif; ?>
     </tbody>
 </table>
@@ -86,6 +88,16 @@ require 'header.php';
                 <label class="form-label">PIN (4 digitos)</label>
                 <input type="text" name="pin" id="opPin" class="form-control" required pattern="[0-9]{4}" maxlength="4" inputmode="numeric">
             </div>
+            <div class="mb-3">
+                <label class="form-label">Coste mano de obra (EUR/hora)</label>
+                <input type="number" name="coste_hora" id="opCosteHora" class="form-control" min="0" step="0.01" value="0">
+                <small class="text-muted">Se aplica automaticamente al articulo de mano de obra</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tiempo operativo (minutos/dia)</label>
+                <input type="number" name="tiempo_operativo" id="opTiempoOp" class="form-control" min="0" step="1" value="480">
+                <small class="text-muted">Para calcular el aprovechamiento de la jornada (ej: 480 = 8h)</small>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-primary">Guardar</button>
@@ -101,12 +113,16 @@ function resetForm() {
     document.getElementById('opId').value = '';
     document.getElementById('opNombre').value = '';
     document.getElementById('opPin').value = '';
+    document.getElementById('opCosteHora').value = '0';
+    document.getElementById('opTiempoOp').value = '480';
 }
-function editOp(id, nombre, pin) {
+function editOp(id, nombre, pin, costeHora, tiempoOp) {
     document.getElementById('modalTitle').textContent = 'Editar Operario';
     document.getElementById('opId').value = id;
     document.getElementById('opNombre').value = nombre;
     document.getElementById('opPin').value = pin;
+    document.getElementById('opCosteHora').value = costeHora;
+    document.getElementById('opTiempoOp').value = tiempoOp;
     new bootstrap.Modal(document.getElementById('modalOp')).show();
 }
 </script>

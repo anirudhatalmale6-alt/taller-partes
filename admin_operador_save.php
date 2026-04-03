@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') redirect('admin_operadores.php');
 $id = (int)($_POST['id'] ?? 0);
 $nombre = trim($_POST['nombre'] ?? '');
 $pin = trim($_POST['pin'] ?? '');
+$coste_hora = max(0, (float)($_POST['coste_hora'] ?? 0));
+$tiempo_operativo = max(0, (int)($_POST['tiempo_operativo'] ?? 480));
 
 if (!$nombre || !preg_match('/^\d{4}$/', $pin)) {
     flash('error', 'Nombre y PIN (4 digitos) son obligatorios');
@@ -21,12 +23,12 @@ if ($check->fetch()) {
 }
 
 if ($id > 0) {
-    $stmt = db()->prepare("UPDATE operadores SET nombre=?, pin=? WHERE id=?");
-    $stmt->execute([$nombre, $pin, $id]);
+    $stmt = db()->prepare("UPDATE operadores SET nombre=?, pin=?, coste_hora=?, tiempo_operativo=? WHERE id=?");
+    $stmt->execute([$nombre, $pin, $coste_hora, $tiempo_operativo, $id]);
     flash('ok', 'Operario actualizado');
 } else {
-    $stmt = db()->prepare("INSERT INTO operadores (nombre, pin) VALUES (?, ?)");
-    $stmt->execute([$nombre, $pin]);
+    $stmt = db()->prepare("INSERT INTO operadores (nombre, pin, coste_hora, tiempo_operativo) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$nombre, $pin, $coste_hora, $tiempo_operativo]);
     flash('ok', 'Operario creado');
 }
 

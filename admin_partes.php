@@ -103,6 +103,7 @@ require 'header.php';
                 <a href="admin_parte_ver.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary" title="Ver"><i class="bi bi-eye"></i></a>
                 <a href="admin_parte_form.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
                 <a href="admin_parte_print.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-dark" title="Imprimir" target="_blank"><i class="bi bi-printer"></i></a>
+                <a href="admin_parte_delete.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-danger" title="Borrar" onclick="return confirm('Seguro que quieres borrar el parte #<?= $p['id'] ?>? Esta accion no se puede deshacer.')"><i class="bi bi-trash"></i></a>
             </td>
         </tr>
     <?php endforeach; ?>

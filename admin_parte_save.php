@@ -112,7 +112,7 @@ try {
     foreach ($submitted_articulos as $a) {
         $desc = trim($a['descripcion'] ?? '');
         if (!$desc) continue;
-        $cant = max(1, (int)($a['cantidad'] ?? 1));
+        $cant = max(0.01, (float)($a['cantidad'] ?? 1));
         $coste = max(0, (float)($a['precio_coste'] ?? 0));
         $venta = max(0, (float)($a['precio_venta'] ?? 0));
         $aid = (int)($a['id'] ?? 0);
